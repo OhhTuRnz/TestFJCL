@@ -2,41 +2,25 @@ pipeline {
     agent any
 
     environment {
-        GITHUB_CREDS = 'github-credentials-id' // Jenkins credential ID for GitHub
-        GITHUB_REPO = 'fjcl/TestFJCL'          // GitHub repository (e.g., 'user/repo')
-        GITHUB_COMMIT = ''                     // Populated dynamically
+        GITHUB_TOKEN = credentials('repo_PAT')
     }
 
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    // Get the commit hash
-                    GITHUB_COMMIT = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                }
-                // Checkout the code
                 checkout scm
             }
         }
-        stage('Set Pending Status') {
-            steps {
-                script {
-                    githubNotify context: 'Build',
-                                 status: 'PENDING',
-                                 description: 'Build is in progress',
-                                 repo: GITHUB_REPO,
-                                 sha: GITHUB_COMMIT
-                }
-            }
-        }
+
         stage('Build') {
             steps {
                 sh './gradlew clean build'
             }
         }
-        stage('Test') {
+
+        stage('JaCoCo Test Coverage') {
             steps {
-                sh './gradlew test'
+                sh './gradlew jacocoTestCoverageVerification'
             }
         }
     }
@@ -44,24 +28,31 @@ pipeline {
     post {
         success {
             script {
-                githubNotify context: 'Build',
-                             status: 'SUCCESS',
-                             description: 'Build and tests succeeded',
-                             repo: GITHUB_REPO,
-                             sha: GITHUB_COMMIT
+                updateGitHubStatus('SUCCESS', 'Build and coverage passed')
             }
         }
+
         failure {
             script {
-                githubNotify context: 'Build',
-                             status: 'FAILURE',
-                             description: 'Build or tests failed',
-                             repo: GITHUB_REPO,
-                             sha: GITHUB_COMMIT
+                updateGitHubStatus('FAILURE', 'Build or coverage failed')
             }
         }
-        always {
-            echo 'Build process completed'
+    }
+}
+
+def updateGitHubStatus(String state, String description) {
+    def context = "ci-jenkins"
+    def commitSha = env.GIT_COMMIT
+
+    withCredentials([string(credentialsId: 'repot_PAT_secret', variable: 'GITHUB_TOKEN')]) {
+        def url = "https://api.github.com/repos/OhhTuRnz/TestFJCL/statuses/${commitSha}"
+        def data = """
+        {
+            "state": "${state}",
+            "description": "${description}",
+            "context": "${context}"
         }
+        """
+        // sh "curl -X POST -H 'Authorization: token ${GITHUB_TOKEN}' -d '${data}' ${url}"
     }
 }
