@@ -2,6 +2,11 @@ pipeline {
     agent any
 
     stages {
+        environment {
+            PULL_REQUEST_ID = "${env.ghprbPullId}"  // Capture ghprbPullId as an environment variable
+            PULL_REQUEST_LINK = "${env.ghprbPullLink}"  // Capture ghprbPullLink as an environment variable
+        }
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -31,14 +36,6 @@ pipeline {
 
         failure {
             script {
-                println "${ghprbPullId}"
-                println "${ghprbPullLink}"
-                println "${ghprbPullTitle}"
-                println "${ghprbActualCommit}"
-                println "${ghprbActualCommitAuthor}"
-                println "${ghprbSourceBranch}"
-                println "${ghprbTargetBranch}"
-                println "${ghprbCommentBody}"
                 setGitHubPullRequestStatus(context: 'CI-Jenkins', message: 'Build or coverage failed', state: 'FAILURE')
             }
         }
