@@ -31,12 +31,15 @@ pipeline {
 
         failure {
             script {
+                println CHANGE_ID
+                println CHANGE_BRANCH
+                println CHANGE_TARGET
+                println CHANGE_AUTHOR
                 setGitHubPullRequestStatus(context: 'CI-Jenkins', message: 'Build or coverage failed', state: 'FAILURE')
             }
         }
     }
 }
-
 
 def updateGitHubStatus(String state, String description) {
     def context = "ci-jenkins"
