@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        GITHUB_TOKEN = credentials('github-token') // Store your GitHub token securely in Jenkins credentials
+        GITHUB_TOKEN = credentials('repot_PAT_secret') // Store your GitHub token securely in Jenkins credentials
         REPO_OWNER = 'OhhTuRnz'
         REPO_NAME = 'testFJCL'
     }
