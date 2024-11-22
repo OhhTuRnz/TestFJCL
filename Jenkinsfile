@@ -36,6 +36,8 @@ pipeline {
 
         failure {
             script {
+                println env.PULL_REQUEST_ID
+                println env.PULL_REQUEST_LINK
                 setGitHubPullRequestStatus(context: 'CI-Jenkins', message: 'Build or coverage failed', state: 'FAILURE')
             }
         }
