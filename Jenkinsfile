@@ -1,7 +1,31 @@
 pipeline {
     agent any
-
+    environment {
+        GITHUB_TOKEN = credentials('github-token') // Store your GitHub token securely in Jenkins credentials
+        REPO_OWNER = 'OhhTuRnz'
+        REPO_NAME = 'testFJCL'
+    }
     stages {
+        stage('Initialize') {
+            steps {
+                script {
+                    if (!env.ghprbPullId || !env.ghprbActualCommit) {
+                        error "This pipeline must be triggered by a GitHub Pull Request event."
+                    }
+                    echo "Processing Pull Request #${env.ghprbPullId}"
+                    echo "Commit SHA: ${env.ghprbActualCommit}"
+                }
+            }
+        }
+
+        stage('Set Status to Pending') {
+            steps {
+                script {
+                    updateGitHubStatus('pending', 'Build in progress', 'ci/jenkins', null)
+                }
+            }
+        }
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -20,37 +44,36 @@ pipeline {
                 sh './gradlew jacocoTestCoverageVerification'
             }
         }
-    }
 
-    post {
-        success {
-            script {
-                updateGitHubStatus('success', 'Build and coverage passed')
+        post {
+            success {
+                script {
+                    updateGitHubStatus('success', 'Build and coverage check passed', 'ci/jenkins', env.BUILD_URL)
+                }
             }
-        }
 
-        failure {
-            script {
-                updateGitHubStatus('failure', 'Build or coverage failed')
+            failure {
+                script {
+                    updateGitHubStatus('failure', 'Build or coverage check failed', 'ci/jenkins', env.BUILD_URL)
+                }
             }
         }
     }
 }
 
+def updateGitHubStatus(state, description, context, targetUrl) {
+    def statusData = [
+        state       : state,
+        description : description,
+        context     : context,
+        target_url  : targetUrl ?: '' // Use an empty string if no targetUrl is provided
+    ]
 
-def updateGitHubStatus(String state, String description) {
-    def context = "ci/jenkins"
-    def commitSha = env.GIT_COMMIT
-
-    withCredentials([string(credentialsId: 'repo_fjcl_PAT_secret', variable: 'GITHUB_TOKEN')]) {
-        def url = "https://api.github.com/repos/fjcl/TestFJCL/statuses/${commitSha}"
-        def data = """
-        {
-            "state": "${state}",
-            "description": "${description}",
-            "context": "${context}"
-        }
-        """
-        sh "curl -X POST -H 'Authorization: token ${GITHUB_TOKEN}' -d '${data}' ${url}"
-    }
+    sh """
+    curl -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d '${groovy.json.JsonOutput.toJson(statusData)}' \
+    https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.ghprbActualCommit}
+    """
 }
