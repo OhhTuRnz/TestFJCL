@@ -31,10 +31,14 @@ pipeline {
 
         failure {
             script {
-                println "${env.CHANGE_ID}"
-                println "${env.CHANGE_BRANCH}"
-                println "${env.CHANGE_TARGET}"
-                println "${env.CHANGE_AUTHOR}"
+                println "${ghprbPullId}"
+                println "${ghprbPullLink}"
+                println "${ghprbPullTitle}"
+                println "${ghprbActualCommit}"
+                println "${ghprbActualCommitAuthor}"
+                println "${ghprbSourceBranch}"
+                println "${ghprbTargetBranch}"
+                println "${ghprbCommentBody}"
                 setGitHubPullRequestStatus(context: 'CI-Jenkins', message: 'Build or coverage failed', state: 'FAILURE')
             }
         }
