@@ -29,13 +29,13 @@ pipeline {
     post {
         success {
             script {
-                updateGitHubStatus('SUCCESS', 'Build and coverage passed')
+                updateGitHubStatus('success', 'Build and coverage passed')
             }
         }
 
         failure {
             script {
-                updateGitHubStatus('FAILURE', 'Build or coverage failed')
+                updateGitHubStatus('failure', 'Build or coverage failed')
             }
         }
     }
