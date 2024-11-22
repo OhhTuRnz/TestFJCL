@@ -45,7 +45,7 @@ def updateGitHubStatus(String state, String description) {
     def context = "ci-jenkins"
     def commitSha = env.GIT_COMMIT
 
-    withCredentials([string(credentialsId: 'repot_fjcl_PAT_secret', variable: 'GITHUB_TOKEN')]) {
+    withCredentials([string(credentialsId: 'repo_fjcl_PAT_secret', variable: 'GITHUB_TOKEN')]) {
         def url = "https://api.github.com/repos/fjcl/TestFJCL/statuses/${commitSha}"
         def data = """
         {
