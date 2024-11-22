@@ -1,10 +1,5 @@
 pipeline {
     agent any
-    environment {
-        PULL_REQUEST_ID = "${env.ghprbPullId}"  // Capture ghprbPullId as an environment variable
-        PULL_REQUEST_LINK = "${env.ghprbPullLink}"  // Capture ghprbPullLink as an environment variable
-    }
-
 
     stages {
         stage('Checkout') {
@@ -30,22 +25,21 @@ pipeline {
     post {
         success {
             script {
-                setGitHubPullRequestStatus(context: 'CI-Jenkins', message: 'Build and coverage passed', state: 'SUCCESS')
+                updateGitHubStatus(state: 'success', description: 'Build and coverage passed')
             }
         }
 
         failure {
             script {
-                println env.PULL_REQUEST_ID
-                println env.PULL_REQUEST_LINK
-                setGitHubPullRequestStatus(context: 'CI-Jenkins', message: 'Build or coverage failed', state: 'FAILURE')
+                updateGitHubStatus(state: 'failure', description: 'Build or coverage failed')
             }
         }
     }
 }
 
+
 def updateGitHubStatus(String state, String description) {
-    def context = "ci-jenkins"
+    def context = "ci/jenkins"
     def commitSha = env.GIT_COMMIT
 
     withCredentials([string(credentialsId: 'repo_fjcl_PAT_secret', variable: 'GITHUB_TOKEN')]) {
