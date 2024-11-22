@@ -26,13 +26,13 @@ pipeline {
 
         success {
             script {
-                setGitHubPullRequestStatus  context: 'CI-Jenkins', message: 'Build and coverage passed', state: 'success'
+                setGitHubPullRequestStatus(context: 'CI-Jenkins', message: 'Build and coverage passed', state: 'success')
             }
         }
 
         failure {
             script {
-                setGitHubPullRequestStatus  context: 'CI-Jenkins', message: 'Build or coverage failed', state: 'failure'
+                setGitHubPullRequestStatus(context: 'CI-Jenkins', message: 'Build or coverage failed', state: 'failure')
             }
         }
     }
