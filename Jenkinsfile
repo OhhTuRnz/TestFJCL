@@ -46,7 +46,7 @@ def updateGitHubStatus(String state, String description) {
     def commitSha = env.GIT_COMMIT
 
     println "updateGitHubStatus"
-    println ${commitSha}
+    println "${commitSha}"
 
     withCredentials([string(credentialsId: 'repot_PAT_secret', variable: 'GITHUB_TOKEN')]) {
         def url = "https://api.github.com/repos/fjcl/TestFJCL/statuses/${commitSha}"
