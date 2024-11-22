@@ -37,7 +37,6 @@ pipeline {
     }
 }
 
-
 def updateGitHubStatus(String state, String description) {
     def context = "ci-jenkins"
     def commitSha = env.GIT_COMMIT
