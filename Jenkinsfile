@@ -44,18 +44,18 @@ pipeline {
                 sh './gradlew jacocoTestCoverageVerification'
             }
         }
+    }
 
-        post {
-            success {
-                script {
-                    updateGitHubStatus('success', 'Build and coverage check passed', 'ci/jenkins', env.BUILD_URL)
-                }
+    post {
+        success {
+            script {
+                updateGitHubStatus('success', 'Build and coverage check passed', 'ci/jenkins', env.BUILD_URL)
             }
+        }
 
-            failure {
-                script {
-                    updateGitHubStatus('failure', 'Build or coverage check failed', 'ci/jenkins', env.BUILD_URL)
-                }
+        failure {
+            script {
+                updateGitHubStatus('failure', 'Build or coverage check failed', 'ci/jenkins', env.BUILD_URL)
             }
         }
     }
