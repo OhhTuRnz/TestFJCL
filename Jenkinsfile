@@ -31,10 +31,10 @@ pipeline {
 
         failure {
             script {
-                println CHANGE_ID
-                println CHANGE_BRANCH
-                println CHANGE_TARGET
-                println CHANGE_AUTHOR
+                println "${env.CHANGE_ID}"
+                println "${env.CHANGE_BRANCH}"
+                println "${env.CHANGE_TARGET}"
+                println "${env.CHANGE_AUTHOR}"
                 setGitHubPullRequestStatus(context: 'CI-Jenkins', message: 'Build or coverage failed', state: 'FAILURE')
             }
         }
